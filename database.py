@@ -77,7 +77,7 @@ class ModelDatabase:
                 yield {
                     "timestamp": upload_time,
                     "river_name": river_name,
-                    "est_level": est_level,
+                    "est_level": float(est_level),
                     "points": [
                         (struct.unpack("f", model_points[i:i+4])[0], struct.unpack("f", model_points[i+4:i+8])[0])
                         for i in range(0, len(model_points), 8)
