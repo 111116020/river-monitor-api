@@ -1,0 +1,16 @@
+# /etc/systemd/system/river-realtime-api.service
+[Unit]
+Description=River Real-Time Monitoring API Server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/river/river-monitor-api/venv/bin/python3 /home/river/river-monitor-api
+WorkingDirectory=/home/river/river-monitor-api
+Restart=on-failure
+RestartSec=5
+User=river
+Group=river
+
+[Install]
+WantedBy=multi-user.target
