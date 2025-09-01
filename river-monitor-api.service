@@ -5,7 +5,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/home/river/river-monitor-api/venv/bin/python3 /home/river/river-monitor-api
+ExecStart=/home/river/river-monitor-api/.venv/bin/python3 /home/river/river-monitor-api
 WorkingDirectory=/home/river/river-monitor-api
 Restart=on-failure
 RestartSec=5
