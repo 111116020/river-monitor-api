@@ -76,13 +76,13 @@ if __name__ == "__main__":
             abort(400)
 
         try:
-            timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
-            image_path = pathlib.Path(args.upload_dir).joinpath(f"{timestamp}.png")
+            timestamp = datetime.datetime.now(datetime.timezone.utc)
+            image_path = pathlib.Path(args.upload_dir).joinpath(f"{int(timestamp.timestamp())}.png")
             if not os.path.isdir(image_path.parent):
                 os.makedirs(image_path.parent)
             image.save(image_path)
             db.insert_data(
-                timestamp=timestamp,
+                timestamp=timestamp.strftime("%Y-%m-%d %H:%M:%S"),
                 river_name=request.form["river_name"],
                 country_name=request.form["country_name"] if "country_name" in request.form else "",
                 basin_name=request.form["basin_name"] if "basin_name" in request.form else "",
