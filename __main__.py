@@ -96,15 +96,34 @@ if __name__ == "__main__":
         
     # Path for handling data request
     @app.route("/retrieve", methods=["POST"])
-    def send_data():
+    def send_history_data():
         if not request.is_json:
             logging.warning("Rejected non-JSON request for '/retrieve'.")
+            abort(400)
+        if not any([key in request.json for key in ["start", "end"]]):
+            logging.warning("Missing some fields from the sent form.")
             abort(400)
         start_ts = request.json["start"] if "start" in request.json and isinstance(request.json["start"], int) else None
         end_ts = request.json["end"] if "end" in request.json and isinstance(request.json["end"], int) else None
         
         try:
-            return [ r for r in db.retrieve_data(start_ts=start_ts, end_ts=end_ts) ]
+            return [ r for r in db.retrieve_history_data(start_ts=start_ts, end_ts=end_ts) ]
+        except Exception as e:
+            logging.exception("Unable to retrieve data!", exc_info=e)
+            return {"error": f"{e.__class__.__name__}: {e}"}, 500
+        
+    # Path for handling data request
+    @app.route("/retrieve/<string:timestamp>", methods=["GET"])
+    def send_data(timestamp):
+        _timestamp = None
+        try:
+            if timestamp != "latest":
+                _timestamp = int(timestamp)
+        except ValueError as e:
+            logging.exception("Invalid timestamp.", exc_info=e)
+            abort(400)
+        try:
+            return db.retrieve_data(timestamp=_timestamp)
         except Exception as e:
             logging.exception("Unable to retrieve data!", exc_info=e)
             return {"error": f"{e.__class__.__name__}: {e}"}, 500
