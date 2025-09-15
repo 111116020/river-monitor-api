@@ -53,7 +53,7 @@ if __name__ == "__main__":
     # Path for handling data upload
     @app.route("/upload", methods=['POST'])
     def upload():
-        if not all([form_name in request.form for form_name in ["river_name", "points", "depth"]]):
+        if not all([form_name in request.form for form_name in ["river_name", "depth"]]):
             logging.warning("Missing some fields from the sent form.")
             abort(400)
         if "image" not in request.files:
