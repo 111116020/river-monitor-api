@@ -29,7 +29,6 @@ class ModelDatabase:
             timestamp: str,
             river_name: str,
             est_level: float,
-            points: list[tuple[float, float]],
             country_name="",
             basin_name="",
         ):
@@ -37,21 +36,15 @@ class ModelDatabase:
         if not self.conn.is_connected():
             self.conn.reconnect()
 
-        model_points = io.BytesIO()
-        for x, y in points:
-            model_points.write(struct.pack("f", x))
-            model_points.write(struct.pack("f", y))
-
         sql = f"""INSERT INTO WaterLevel
-                (upload_time, river_name, est_level, model_points, country_name, basin_name) 
-                VALUES (%s, %s, %s, %s, %s, %s)"""
+                (upload_time, river_name, est_level, country_name, basin_name) 
+                VALUES (%s, %s, %s, %s, %s)"""
         
         with self.conn.cursor() as cursor:
             cursor.execute(sql, (
                 timestamp, 
                 river_name, 
                 est_level, 
-                model_points.getvalue(),
                 country_name,
                 basin_name
             ))

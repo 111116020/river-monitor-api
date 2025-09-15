@@ -60,11 +60,6 @@ if __name__ == "__main__":
             logging.warning("Missing \"image\" from the sent form.")
             abort(400)
         try:
-            json.loads(request.form["points"])
-        except json.JSONDecodeError as e:
-            logging.exception("Invalid \"points\" data.", exc_info=e)
-            abort(400)
-        try:
             depth = float(request.form["depth"])
         except ValueError as e:
             logging.exception("Invalid \"depth\" data.", exc_info=e)
@@ -86,8 +81,7 @@ if __name__ == "__main__":
                 river_name=request.form["river_name"],
                 country_name=request.form["country_name"] if "country_name" in request.form else "",
                 basin_name=request.form["basin_name"] if "basin_name" in request.form else "",
-                est_level=depth,
-                points=json.loads(request.form["points"])
+                est_level=depth
             )
             return {"status": "OK"}
         except Exception as e:
