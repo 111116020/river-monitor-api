@@ -1,0 +1,10 @@
+{
+    "port": API_PORT,
+    "database": {
+        "host": "DB_HOSTNAME",
+        "port": DB_PORT,
+        "user": "DB_USERNAME",
+        "password": "DB_PASSWORD",
+        "schema": "DB_SCHEME"
+    }
+}

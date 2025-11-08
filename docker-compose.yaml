@@ -1,0 +1,42 @@
+volumes:
+  river-db-data:
+
+networks:
+  river-api-network:
+
+services:
+  river-db:
+    image: mariadb
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: example
+    volumes:
+      - river-db-data:/var/lib/mysql
+    hostname: river-api-db
+    networks:
+      river-api-network:
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # river-db-adminer:
+  #   image: adminer
+  #   restart: always
+  #   ports:
+  #     - 8080:8080
+  #   networks:
+  #     river-api-network:
+
+  river-api:
+    build: .
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      river-api-network:
+    depends_on:
+      river-db:
+        condition: service_healthy
