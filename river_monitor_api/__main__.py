@@ -9,7 +9,7 @@ from flask import Flask, request, abort, send_file
 import gevent.pywsgi
 from PIL import Image, UnidentifiedImageError
 
-from .database import ModelDatabase
+from database import ModelDatabase
     
 
 if __name__ == "__main__":
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     args = args_parser.parse_args()
 
     # Initialize database
-    config = json.load(open(pathlib.Path().joinpath("config.json")))
+    config = json.load(open(pathlib.Path(__file__).parent.joinpath("config.json")))
     db = ModelDatabase(
         host=config["database"]["host"],
         port=config["database"]["port"],
@@ -52,16 +52,11 @@ if __name__ == "__main__":
     # Path for handling data upload
     @app.route("/upload", methods=['POST'])
     def upload():
-        if not all([form_name in request.form for form_name in ["river_name", "points", "depth"]]):
+        if not all([form_name in request.form for form_name in ["river_name", "depth"]]):
             logging.warning("Missing some fields from the sent form.")
             abort(400)
         if "image" not in request.files:
             logging.warning("Missing \"image\" from the sent form.")
-            abort(400)
-        try:
-            json.loads(request.form["points"])
-        except json.JSONDecodeError as e:
-            logging.exception("Invalid \"points\" data.", exc_info=e)
             abort(400)
         try:
             depth = float(request.form["depth"])
@@ -85,8 +80,7 @@ if __name__ == "__main__":
                 river_name=request.form["river_name"],
                 country_name=request.form["country_name"] if "country_name" in request.form else "",
                 basin_name=request.form["basin_name"] if "basin_name" in request.form else "",
-                est_level=depth,
-                points=json.loads(request.form["points"])
+                est_level=depth
             )
             return {"status": "OK"}
         except Exception as e:
@@ -145,7 +139,7 @@ if __name__ == "__main__":
 
     # Start HTTP server
     server = gevent.pywsgi.WSGIServer(
-        listener=("0.0.0.0" if args.ipv4 else "::", config["port"]),
+        listener=("127.0.0.1" if args.ipv4 else "::1", config["port"]),
         application=app,
         log=logging.getLogger()
     )

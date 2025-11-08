@@ -1,8 +1,3 @@
-import datetime
-import io
-import json
-import struct
-from typing import Any
 import mysql.connector
 
 class ModelDatabase:
@@ -29,7 +24,6 @@ class ModelDatabase:
             timestamp: str,
             river_name: str,
             est_level: float,
-            points: list[tuple[float, float]],
             country_name="",
             basin_name="",
         ):
@@ -37,21 +31,15 @@ class ModelDatabase:
         if not self.conn.is_connected():
             self.conn.reconnect()
 
-        model_points = io.BytesIO()
-        for x, y in points:
-            model_points.write(struct.pack("f", x))
-            model_points.write(struct.pack("f", y))
-
         sql = f"""INSERT INTO WaterLevel
-                (upload_time, river_name, est_level, model_points, country_name, basin_name) 
-                VALUES (%s, %s, %s, %s, %s, %s)"""
+                (upload_time, river_name, est_level, country_name, basin_name) 
+                VALUES (%s, %s, %s, %s, %s)"""
         
         with self.conn.cursor() as cursor:
             cursor.execute(sql, (
                 timestamp, 
                 river_name, 
                 est_level, 
-                model_points.getvalue(),
                 country_name,
                 basin_name
             ))
@@ -84,7 +72,7 @@ class ModelDatabase:
         if not self.conn.is_connected():
             self.conn.reconnect()
 
-        sql_query = f"SELECT UNIX_TIMESTAMP(upload_time), river_name, est_level, model_points, country_name, basin_name FROM WaterLevel "
+        sql_query = f"SELECT UNIX_TIMESTAMP(upload_time), river_name, est_level, country_name, basin_name FROM WaterLevel "
         if timestamp:
             sql_query += f"WHERE UNIX_TIMESTAMP(upload_time) = {timestamp}"
         else:
@@ -92,16 +80,12 @@ class ModelDatabase:
 
         with self.conn.cursor() as cursor:
             cursor.execute(sql_query, map_results=True)
-            upload_time, river_name, est_level, model_points, country_name, basin_name = cursor.fetchone()
+            upload_time, river_name, est_level, country_name, basin_name = cursor.fetchone()
             
         return {
             "timestamp": upload_time,
             "river_name": river_name,
             "est_level": float(est_level),
-            "model_points": [
-                (struct.unpack("f", model_points[i:i+4])[0], struct.unpack("f", model_points[i+4:i+8])[0])
-                for i in range(0, len(model_points), 8)
-            ],
             "country_name": country_name,
             "basin_name": basin_name
         }
