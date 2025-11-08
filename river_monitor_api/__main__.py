@@ -9,7 +9,7 @@ from flask import Flask, request, abort, send_file
 import gevent.pywsgi
 from PIL import Image, UnidentifiedImageError
 
-from database import ModelDatabase
+from .database import ModelDatabase
     
 
 if __name__ == "__main__":
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     args = args_parser.parse_args()
 
     # Initialize database
-    config = json.load(open(pathlib.Path(__file__).parent.joinpath("config.json")))
+    config = json.load(open(pathlib.Path().parent.joinpath("config.json")))
     db = ModelDatabase(
         host=config["database"]["host"],
         port=config["database"]["port"],
@@ -139,7 +139,7 @@ if __name__ == "__main__":
 
     # Start HTTP server
     server = gevent.pywsgi.WSGIServer(
-        listener=("127.0.0.1" if args.ipv4 else "::1", config["port"]),
+        listener=("0.0.0.0" if args.ipv4 else "::", config["port"]),
         application=app,
         log=logging.getLogger()
     )
